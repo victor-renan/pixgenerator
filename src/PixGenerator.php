@@ -14,7 +14,7 @@ class PixGenerator
     private const QRCPSMCM = '000201';
 
     private const DEFAULT_GUI = 'br.gov.bcb.pix';
-    private const DEFAULT_MERCHANT_CITY = 'BRASILIA';
+    private const DEFAULT_MERCHANT_CITY = 'CIDADE';
     private const DEFAULT_MERCHANT_NAME = 'RECEBEDOR';
     private const DEFAULT_TRANSACTION_CURRENCY = '986';
     private const DEFAULT_COUNTRY_CODE = 'BR';
@@ -23,6 +23,7 @@ class PixGenerator
     private const ID_MERCHANT_ACCOUNT_INFORMATION = '26';
     private const ID_MERCHANT_ACCOUNT_INFORMATION_GUI = '00';
     private const ID_MERCHANT_ACCOUNT_INFORMATION_CHAVE = '01';
+    private const ID_MERCHANT_ACCOUNT_INFORMATION_ADDITIONAL_INFO = '02';
     private const ID_MERCHANT_CATEGORY_CODE = '52';
     private const ID_TRANSACTION_CODE = '53';
     private const ID_MERCHANT_NAME = '59';
@@ -38,6 +39,7 @@ class PixGenerator
     public string $transactionId;
     public string $merchantName;
     public string $merchantCity;
+    public ?string $additionalInfo;
 
     public function __construct(
         string $chavePix,
@@ -45,12 +47,14 @@ class PixGenerator
         ?string $transactionId = null,
         ?string $merchantName = null,
         ?string $merchantCity = null,
+        ?string $additionalInfo = null,
     ) {
         $this->chavePix = $chavePix;
         $this->transactionAmount = $transactionAmount;
         $this->transactionId = $transactionId ?: Str::random(6);
         $this->merchantName = $merchantName ?: self::DEFAULT_MERCHANT_NAME;
         $this->merchantCity = $merchantCity ?: self::DEFAULT_MERCHANT_CITY;
+        $this->additionalInfo = $additionalInfo;
     }
 
     public function code(): string
@@ -72,15 +76,35 @@ class PixGenerator
 
     private function setMerchantAccountInformation(string &$content)
     {
-        $content .=
-            self::ID_MERCHANT_ACCOUNT_INFORMATION
-            . Str::padlen(strlen(self::DEFAULT_GUI . $this->chavePix) + 8)
-            . self::ID_MERCHANT_ACCOUNT_INFORMATION_GUI
+        $gui =
+            self::ID_MERCHANT_ACCOUNT_INFORMATION_GUI
             . Str::padlen(strlen(self::DEFAULT_GUI))
-            . self::DEFAULT_GUI
-            . self::ID_MERCHANT_ACCOUNT_INFORMATION_CHAVE
+            . self::DEFAULT_GUI;
+
+        $chave =
+            self::ID_MERCHANT_ACCOUNT_INFORMATION_CHAVE
             . Str::padlen(strlen($this->chavePix))
             . $this->chavePix;
+
+        $content .= self::ID_MERCHANT_ACCOUNT_INFORMATION;
+
+        if ($this->additionalInfo != null) {
+            $additionalInfo =
+                self::ID_MERCHANT_ACCOUNT_INFORMATION_ADDITIONAL_INFO
+                . Str::padlen(strlen($this->additionalInfo))
+                . $this->additionalInfo;
+
+            $content .=
+                Str::padlen(strlen(self::DEFAULT_GUI . $this->chavePix . $this->additionalInfo) + 3 * 4)
+                . $gui
+                . $chave
+                . $additionalInfo;
+        } else {
+            $content .=
+                Str::padlen(strlen(self::DEFAULT_GUI . $this->chavePix) + 2 * 4)
+                . $gui
+                . $chave;
+        }
     }
 
     private function setMerchantCategoryCode(string &$content)
@@ -146,7 +170,7 @@ class PixGenerator
     }
 
     private function setCRC16(string &$content)
-    {        
+    {
         $content .= self::ID_CRC16 . '04';
         $content .= CRC16::make($content);
     }
