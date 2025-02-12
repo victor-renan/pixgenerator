@@ -1,0 +1,17 @@
+{
+    "name": "victor-renan/pixgen",
+    "description": "A static PIX (copy and paste) generator",
+    "type": "library",
+    "autoload": {
+        "psr-4": {
+            "VictorRenan\\Pixgen\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Renan",
+            "email": "alvesrenanpro@gmail.com"
+        }
+    ],
+    "require": {}
+}
