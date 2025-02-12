@@ -1,6 +1,6 @@
 {
     "name": "victor-renan/pixgenerator",
-    "description": "A static PIX (copy and paste) generator",
+    "description": "A static PIX (copy and paste) and QRCode generator",
     "type": "library",
     "autoload": {
         "psr-4": {
@@ -13,5 +13,7 @@
             "email": "alvesrenanpro@gmail.com"
         }
     ],
-    "require": {}
+    "require": {
+        "mpdf/mpdf": "^6.1"
+    }
 }
