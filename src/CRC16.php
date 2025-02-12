@@ -1,6 +1,6 @@
 <?php
 
-namespace VictorRenan\Pixgen;
+namespace VictorRenan\PixGenerator;
 
 class CRC16
 {

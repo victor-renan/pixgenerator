@@ -1,8 +1,8 @@
 <?php
 
-namespace VictorRenan\Pixgen;
+namespace VictorRenan\PixGenerator;
 
-class Pixgen
+class PixGenerator
 {
     private const MAX_CODE_LEN = 99;
     private const MAX_MERCHANT_INFO_LEN = 99;

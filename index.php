@@ -2,9 +2,9 @@
 
 require_once 'vendor/autoload.php';
 
-use VictorRenan\Pixgen\Pixgen;
+use VictorRenan\PixGenerator\PixGenerator;
 
-$test = new Pixgen(
+$test = new PixGenerator(
     "alvesrenan990@gmail.com",
     100.00,
 );

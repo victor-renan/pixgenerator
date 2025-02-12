@@ -1,10 +1,10 @@
 {
-    "name": "victor-renan/pixgen",
+    "name": "victor-renan/pixgenerator",
     "description": "A static PIX (copy and paste) generator",
     "type": "library",
     "autoload": {
         "psr-4": {
-            "VictorRenan\\Pixgen\\": "src/"
+            "VictorRenan\\PixGenerator\\": "src/"
         }
     },
     "authors": [
