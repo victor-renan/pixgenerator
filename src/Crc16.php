@@ -2,11 +2,11 @@
 
 namespace VictorRenan\PixGenerator;
 
-class CRC16
+class Crc16
 {
     private const POLINOM = 0x1021;
 
-    public static function make(string $chars): string
+    public static function checksum(string $chars, int $nibbles = 4): string
     {
         $crc = 0xFFFF;
 
@@ -14,7 +14,7 @@ class CRC16
             $crc = self::calculate($crc, ord($chars[$i]));
         }
 
-        return substr(sprintf("%X", $crc), -4);
+        return substr(sprintf("%X", $crc), -$nibbles);
     }
 
     private static function calculate(int $crc, int $newByte): int
