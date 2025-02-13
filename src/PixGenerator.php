@@ -40,40 +40,67 @@ class PixGenerator
     public string $merchantCity;
     public ?string $additionalInfo;
 
-    public function __construct(
-        string $chavePix,
-        ?float $transactionAmount = null,
-        ?string $transactionId = null,
-        ?string $merchantName = null,
-        ?string $merchantCity = null,
-        ?string $additionalInfo = null,
-    ) {
+    public function __construct(string $chavePix)
+    {
         $this->chavePix = $chavePix;
+        $this->transactionId = Str::random(6);
+        $this->merchantName = self::DEFAULT_MERCHANT_NAME;
+        $this->merchantCity = self::DEFAULT_MERCHANT_CITY;
+    }
+
+    public static function fromPixKey(string $pixKey): PixGenerator
+    {
+        return new self($pixKey);
+    }
+
+    public function setTransactionAmount(float $transactionAmount): PixGenerator
+    {
         $this->transactionAmount = $transactionAmount;
-        $this->transactionId = $transactionId ?: Str::random(6);
-        $this->merchantName = $merchantName ?: self::DEFAULT_MERCHANT_NAME;
-        $this->merchantCity = $merchantCity ?: self::DEFAULT_MERCHANT_CITY;
+        return $this;
+    }
+
+    public function setTransactionId(string $transactionId): PixGenerator
+    {
+        $this->transactionId = $transactionId;
+        return $this;
+    }
+
+    public function setMerchantName(string $merchantName): PixGenerator
+    {
+        $this->merchantName = $merchantName;
+        return $this;
+    }
+
+    public function setMerchantCity(string $merchantCity): PixGenerator
+    {
+        $this->merchantCity = $merchantCity;
+        return $this;
+    }
+
+    public function setAdditionalInfo(string $additionalInfo): PixGenerator
+    {
         $this->additionalInfo = $additionalInfo;
+        return $this;
     }
 
     public function getCode(): string
     {
         $content = self::QRCPSMCM;
 
-        $this->setMerchantAccountInformation($content);
-        $this->setMerchantCategoryCode($content);
-        $this->setTransactionCurrency($content);
-        $this->setTransactionAmount($content);
-        $this->setCountryCode($content);
-        $this->setMerchantName($content);
-        $this->setMerchantCity($content);
-        $this->setAdditionalDataFieldTemplate($content);
-        $this->setCRC16($content);
+        $this->prepareMerchantAccountInformation($content);
+        $this->prepareMerchantCategoryCode($content);
+        $this->prepareTransactionCurrency($content);
+        $this->prepareTransactionAmount($content);
+        $this->prepareCountryCode($content);
+        $this->prepareMerchantName($content);
+        $this->prepareMerchantCity($content);
+        $this->prepareAdditionalDataFieldTemplate($content);
+        $this->prepareCRC16($content);
 
         return $content;
     }
 
-    private function setMerchantAccountInformation(string &$content)
+    private function prepareMerchantAccountInformation(string &$content)
     {
         $gui = self::ID_MERCHANT_ACCOUNT_INFORMATION_GUI
             . Str::padlen(strlen(self::DEFAULT_GUI))
@@ -98,31 +125,28 @@ class PixGenerator
             throw new PixException('Merchant Info exceeds the maximum length!');
         }
 
-        $content .=
-            self::ID_MERCHANT_ACCOUNT_INFORMATION
+        $content .= self::ID_MERCHANT_ACCOUNT_INFORMATION
             . Str::padlen($bodySize)
             . $gui
             . $chave
             . $additionalInfo;
     }
 
-    private function setMerchantCategoryCode(string &$content)
+    private function prepareMerchantCategoryCode(string &$content)
     {
-        $content .=
-            self::ID_MERCHANT_CATEGORY_CODE
+        $content .= self::ID_MERCHANT_CATEGORY_CODE
             . Str::padlen(strlen(self::DEFAULT_MERCHANT_CATEGORY))
             . self::DEFAULT_MERCHANT_CATEGORY;
     }
 
-    private function setTransactionCurrency(string &$content)
+    private function prepareTransactionCurrency(string &$content)
     {
-        $content .=
-            self::ID_TRANSACTION_CODE
+        $content .= self::ID_TRANSACTION_CODE
             . Str::padlen(strlen(self::DEFAULT_TRANSACTION_CURRENCY))
             . self::DEFAULT_TRANSACTION_CURRENCY;
     }
 
-    private function setTransactionAmount(string &$content)
+    private function prepareTransactionAmount(string &$content)
     {
         if (empty($this->transactionAmount)) {
             return;
@@ -134,45 +158,41 @@ class PixGenerator
             throw new PixException('Transaction Ammount is exceeds the maximum limit!');
         }
 
-        $content .=
-            self::ID_TRANSACTION_AMOUNT
+        $content .= self::ID_TRANSACTION_AMOUNT
             . Str::padlen(strlen($amount))
             . strval($amount);
     }
 
-    private function setCountryCode(string &$content)
+    private function prepareCountryCode(string &$content)
     {
-        $content .=
-            self::ID_COUNTRY_CODE
+        $content .= self::ID_COUNTRY_CODE
             . Str::padlen(strlen(self::DEFAULT_COUNTRY_CODE))
             . self::DEFAULT_COUNTRY_CODE;
     }
 
-    private function setMerchantName(string &$content)
+    private function prepareMerchantName(string &$content)
     {
         if (strlen($this->merchantName) > self::MAX_MERCHANT_NAME_LEN) {
             throw new PixException('Merchant Name exceeds the maximum length!');
         }
 
-        $content .=
-            self::ID_MERCHANT_NAME
+        $content .= self::ID_MERCHANT_NAME
             . Str::padlen(strlen($this->merchantName))
             . $this->merchantName;
     }
 
-    private function setMerchantCity(string &$content)
+    private function prepareMerchantCity(string &$content)
     {
         if (strlen($this->merchantCity) > self::MAX_MERCHANT_CITY_LEN) {
             throw new PixException('Merchant City exceeds the maximum length!');
         }
 
-        $content .=
-            self::ID_MERCHANT_CITY
+        $content .= self::ID_MERCHANT_CITY
             . Str::padlen(strlen($this->merchantCity))
             . $this->merchantCity;
     }
 
-    private function setAdditionalDataFieldTemplate(string &$content)
+    private function prepareAdditionalDataFieldTemplate(string &$content)
     {
         $transactionId = self::ID_ADDITIONAL_DATA_FIELD_TEMPLATE_TXID_ID
             . Str::padlen(strlen($this->transactionId))
@@ -182,13 +202,12 @@ class PixGenerator
             throw new PixException('Additional Data Field Template exceeds the maximum length!');
         }
 
-        $content .=
-            self::ID_ADDITIONAL_DATA_FIELD_TEMPLATE
+        $content .= self::ID_ADDITIONAL_DATA_FIELD_TEMPLATE
             . Str::padlen(strlen($transactionId))
             . $transactionId;
     }
 
-    private function setCRC16(string &$content)
+    private function prepareCRC16(string &$content)
     {
         $content .= self::ID_CRC16 . '04';
         $content .= Crc16::checksum($content);
