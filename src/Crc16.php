@@ -14,7 +14,7 @@ class Crc16
             $crc = self::calculate($crc, ord($chars[$i]));
         }
 
-        return substr(sprintf("%X", $crc), -$nibbles);
+        return substr(sprintf("%X", $crc), - $nibbles);
     }
 
     private static function calculate(int $crc, int $newByte): int
