@@ -34,11 +34,11 @@ class PixGenerator
     private const ID_CRC16 = '63';
 
     public string $chavePix;
-    public ?float $transactionAmount;
+    public ?float $transactionAmount = null;
     public string $transactionId;
     public string $merchantName;
     public string $merchantCity;
-    public ?string $additionalInfo;
+    public ?string $additionalInfo = null;
 
     public function __construct(string $chavePix)
     {
@@ -46,11 +46,6 @@ class PixGenerator
         $this->transactionId = Str::random(6);
         $this->merchantName = self::DEFAULT_MERCHANT_NAME;
         $this->merchantCity = self::DEFAULT_MERCHANT_CITY;
-    }
-
-    public static function fromPixKey(string $pixKey): PixGenerator
-    {
-        return new self($pixKey);
     }
 
     public function setTransactionAmount(float $transactionAmount): PixGenerator
