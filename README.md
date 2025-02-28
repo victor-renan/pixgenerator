@@ -59,6 +59,6 @@ Clone this repoitory and install the dev-dependencies via Composer. After this, 
 
 ```bash
 
-./vendor/bin/phpunit test
+./vendor/bin/phpunit
 
 ``` 
