@@ -2,6 +2,7 @@
     "name": "victor-renan/pixgenerator",
     "description": "A static PIX (copy and paste) generator",
     "type": "library",
+    "license": "MIT",
     "autoload": {
         "psr-4": {
             "VictorRenan\\PixGenerator\\": "src/"
