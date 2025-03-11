@@ -43,6 +43,10 @@ class PixGenerator
 
     public function __construct(string $chavePix)
     {
+        if ($chavePix === '') {
+            throw new PixException('Chave precisa ter no mínimo 1 caractere!');
+        }
+
         $this->chavePix = $chavePix;
         $this->transactionId = PixTools::randomId();
         $this->merchantName = self::DEFAULT_MERCHANT_NAME;
@@ -111,10 +115,10 @@ class PixGenerator
         }
 
         if ($this->additionalInfo != null) {
-            throw new PixException('AdditionalInfo exceeds the maximum length!');
+            throw new PixException('Informação adicional excede o limite de tamanho!');
         }
 
-        throw new PixException('PixKey exceeds the maximum length!');
+        throw new PixException('Chave excede o limite de tamanho!');
     }
 
     private function prepareMerchantCategoryCode(string &$content)
@@ -133,10 +137,10 @@ class PixGenerator
             return;
         }
 
-        $amount = number_format($this->transactionAmount, 2, '.');
+        $amount = number_format($this->transactionAmount, 2, '.', '');
 
         if (strlen($amount) > self::MAX_AMOUNT_LEN) {
-            throw new PixException('TransactionAmmount is exceeds the maximum limit!');
+            throw new PixException('Valor da transação excede o limite!');
         }
 
         $content .= PixTools::makePart(self::ID_TRANSACTION_AMOUNT, strval($amount));
@@ -150,7 +154,7 @@ class PixGenerator
     private function prepareMerchantName(string &$content)
     {
         if (strlen($this->merchantName) > self::MAX_MERCHANT_NAME_LEN) {
-            throw new PixException('MerchantName exceeds the maximum length!');
+            throw new PixException('Nome do recebedor excede o limite de tamanho!');
         }
 
         $content .= PixTools::makePart(self::ID_MERCHANT_NAME, $this->merchantName);
@@ -159,7 +163,7 @@ class PixGenerator
     private function prepareMerchantCity(string &$content)
     {
         if (strlen($this->merchantCity) > self::MAX_MERCHANT_CITY_LEN) {
-            throw new PixException('MerchantCity exceeds the maximum length!');
+            throw new PixException('Nome da cidade excede o limite de tamanho!');
         }
 
         $content .= PixTools::makePart(self::ID_MERCHANT_CITY, $this->merchantCity);
@@ -170,7 +174,7 @@ class PixGenerator
         $transactionId =  PixTools::makePart(self::ID_ADDITIONAL_DATA_FIELD_TEMPLATE_TXID_ID, $this->transactionId);
 
         if (strlen($transactionId) > self::MAX_ADITIONAL_DATA_FIELD_TEMPLATE_LEN) {
-            throw new PixException('TransactionId exceeds the maximum length!');
+            throw new PixException('Id da transação excede o limite de tamanho!');
         }
 
         $content .= PixTools::makePart(self::ID_ADDITIONAL_DATA_FIELD_TEMPLATE, $transactionId);
