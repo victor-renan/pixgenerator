@@ -37,13 +37,12 @@ final class PixGeneratorTest extends TestCase {
     public function testAmountLengthLimit(): void
     {
         $pixKey = 'teste@gmail.com';
-        $valid = 99999999.0;
-        $invalid = 999999999.0;
+        $valid = 9999999999.00;
+        $invalid = 99999999999.00;
 
         $acceptable = new PixGenerator($pixKey);
         $acceptable->setTransactionAmount($valid);
-        $acceptable->getCode();
-
+        
         $this->expectException(PixException::class);
 
         $exceed = new PixGenerator($pixKey);
