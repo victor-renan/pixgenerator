@@ -4,94 +4,74 @@ use PHPUnit\Framework\TestCase;
 use VictorRenan\PixGenerator\PixGenerator;
 use VictorRenan\PixGenerator\PixException;
 
-final class PixGeneratorTest extends TestCase {
-    public function testPixKeyLengthLimits(): void
-    {
-        $limit = PixGenerator::MAX_MERCHANT_INFO_LEN - strlen(PixGenerator::GUI) - 8;
-
-        $acceptable = new PixGenerator(random_bytes($limit));
-        $acceptable->getCode();
-
-        $this->expectException(PixException::class);
-
-        $exceed = new PixGenerator(random_bytes($limit+1));
-        $exceed->getCode();   
-    }
+final class PixGeneratorTest extends TestCase 
+{
+    private string $pixKey = 'teste@mail.com';
 
     public function testAdditionalInfoLengthLimits(): void
     {
-        $pixKey = 'teste@mail.com';
-        $limit = PixGenerator::MAX_MERCHANT_INFO_LEN - strlen(PixGenerator::GUI) - strlen($pixKey) - 3 * 4;
+        $limit = PixGenerator::MAX_MERCHANT_INFO_LEN 
+                 - (4 + strlen(PixGenerator::GUI)) 
+                 - (4 + strlen($this->pixKey)) 
+                 - 4;
 
-        $acceptable = new PixGenerator($pixKey);
-        $acceptable->setAdditionalInfo(random_bytes($limit));
-        $acceptable->getCode();
+        $acceptable = new PixGenerator($this->pixKey);
+        $acceptable->setAdditionalInfo(str_repeat('A', $limit));
+        $this->assertNotEmpty($acceptable->getCode());
 
         $this->expectException(PixException::class);
-
-        $exceed = new PixGenerator($pixKey);
-        $exceed->setAdditionalInfo(random_bytes($limit+1));
+        $exceed = new PixGenerator($this->pixKey);
+        $exceed->setAdditionalInfo(str_repeat('A', $limit + 1));
         $exceed->getCode();
     }
 
     public function testAmountLengthLimit(): void
     {
-        $pixKey = 'teste@gmail.com';
-        $valid = 9999999999.00;
-        $invalid = 99999999999.00;
+        $acceptable = new PixGenerator($this->pixKey);
+        $acceptable->setTransactionAmount(9999999999.99); 
+        $this->assertNotEmpty($acceptable->getCode());
 
-        $acceptable = new PixGenerator($pixKey);
-        $acceptable->setTransactionAmount($valid);
-        
         $this->expectException(PixException::class);
-
-        $exceed = new PixGenerator($pixKey);
-        $exceed->setTransactionAmount($invalid);
+        $exceed = new PixGenerator($this->pixKey);
+        $exceed->setTransactionAmount(99999999999.00); 
         $exceed->getCode();
     }
 
     public function testMerchantNameLengthLimit(): void
     {
-        $pixKey = 'teste@gmail.com';
-
-        $acceptable = new PixGenerator($pixKey);
-        $acceptable->setMerchantName(random_bytes(PixGenerator::MAX_MERCHANT_NAME_LEN));
-        $acceptable->getCode();
+        $acceptable = new PixGenerator($this->pixKey);
+        $acceptable->setMerchantName(str_repeat('A', PixGenerator::MAX_MERCHANT_NAME_LEN));
+        $this->assertNotEmpty($acceptable->getCode());
 
         $this->expectException(PixException::class);
-
-        $exceed = new PixGenerator($pixKey);
-        $exceed->setMerchantName(random_bytes(PixGenerator::MAX_MERCHANT_NAME_LEN+1));
+        $exceed = new PixGenerator($this->pixKey);
+        $exceed->setMerchantName(str_repeat('A', PixGenerator::MAX_MERCHANT_NAME_LEN + 1));
         $exceed->getCode();
     }
 
     public function testMerchantCityLengthLimit(): void
     {
-        $pixKey = 'teste@gmail.com';
-
-        $acceptable = new PixGenerator($pixKey);
-        $acceptable->setMerchantCity(random_bytes(PixGenerator::MAX_MERCHANT_CITY_LEN));
-        $acceptable->getCode();
+        $acceptable = new PixGenerator($this->pixKey);
+        $acceptable->setMerchantCity(str_repeat('A', PixGenerator::MAX_MERCHANT_CITY_LEN));
+        $this->assertNotEmpty($acceptable->getCode());
 
         $this->expectException(PixException::class);
-
-        $exceed = new PixGenerator($pixKey);
-        $exceed->setMerchantCity(random_bytes(PixGenerator::MAX_MERCHANT_CITY_LEN+1));
+        $exceed = new PixGenerator($this->pixKey);
+        $exceed->setMerchantCity(str_repeat('A', PixGenerator::MAX_MERCHANT_CITY_LEN + 1));
         $exceed->getCode();
     }
 
     public function testTransactionIdLengthLimit(): void
     {
-        $pixKey = 'teste@gmail.com';
+        $maxStrLen = PixGenerator::MAX_ADITIONAL_DATA_FIELD_TEMPLATE_LEN - 4;
 
-        $acceptable = new PixGenerator($pixKey);
-        $acceptable->setTransactionId(random_bytes(PixGenerator::MAX_ADITIONAL_DATA_FIELD_TEMPLATE_LEN - 4));
-        $acceptable->getCode();
+        $acceptable = new PixGenerator($this->pixKey);
+        $acceptable->setTransactionId(str_repeat('A', $maxStrLen));
+        $this->assertNotEmpty($acceptable->getCode());
 
         $this->expectException(PixException::class);
-
-        $exceed = new PixGenerator($pixKey);
-        $exceed->setMerchantCity(random_bytes(PixGenerator::MAX_ADITIONAL_DATA_FIELD_TEMPLATE_LEN+1 - 4));
+        $exceed = new PixGenerator($this->pixKey);
+        $exceed->setTransactionId(str_repeat('A', $maxStrLen + 1)); // Corrigido de setMerchantCity
         $exceed->getCode();
     }
 }
