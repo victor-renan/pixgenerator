@@ -41,11 +41,12 @@ class PixGenerator
     public string $merchantCity;
     public ?string $additionalInfo = null;
 
+    public PixValidator $validator;
+
     public function __construct(string $chavePix)
     {
-        if ($chavePix === '') {
-            throw new PixException('Chave precisa ter no mínimo 1 caractere!');
-        }
+        $this->validator = new PixValidator($chavePix);
+        $this->validator->validate();
 
         $this->chavePix = $chavePix;
         $this->transactionId = PixTools::randomId();
