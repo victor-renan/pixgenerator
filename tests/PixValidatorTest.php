@@ -11,7 +11,7 @@ class PixValidatorTest extends TestCase
 {
     public function testValidaCpf(): void
     {
-        $validator = new PixValidator('12345678901');
+        $validator = new PixValidator('11144477735'); // CPF válido
         
         $this->assertTrue($validator->validate());
         $this->assertSame(PixKeyTypeEnum::CPF, $validator->type);
@@ -20,7 +20,7 @@ class PixValidatorTest extends TestCase
 
     public function testValidaCnpj(): void
     {
-        $validator = new PixValidator('12345678901234');
+        $validator = new PixValidator('11222333000181'); // CNPJ válido
         
         $this->assertTrue($validator->validate());
         $this->assertSame(PixKeyTypeEnum::CNPJ, $validator->type);

@@ -63,7 +63,7 @@ final class PixGeneratorTest extends TestCase
 
     public function testTransactionIdLengthLimit(): void
     {
-        $maxStrLen = PixGenerator::MAX_ADITIONAL_DATA_FIELD_TEMPLATE_LEN - 4;
+        $maxStrLen = PixGenerator::MAX_ADDITIONAL_DATA_FIELD_TEMPLATE_LEN - 4;
 
         $acceptable = new PixGenerator($this->pixKey);
         $acceptable->setTransactionId(str_repeat('A', $maxStrLen));
