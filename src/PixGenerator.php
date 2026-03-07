@@ -2,13 +2,19 @@
 
 namespace VictorRenan\PixGenerator;
 
+/**
+ * Gerador de códigos PIX estáticos (copia e cola)
+ * 
+ * Esta classe gera códigos PIX no formato EMV para QR Codes estáticos,
+ * seguindo o Manual de Padrões para Iniciação do PIX do Banco Central do Brasil.
+ */
 class PixGenerator
 {
     public const MAX_MERCHANT_INFO_LEN = 99;
     public const MAX_AMOUNT_LEN = 13;
     public const MAX_MERCHANT_NAME_LEN = 25;
     public const MAX_MERCHANT_CITY_LEN = 15;
-    public const MAX_ADITIONAL_DATA_FIELD_TEMPLATE_LEN = 29;
+    public const MAX_ADDITIONAL_DATA_FIELD_TEMPLATE_LEN = 29;
 
     public const QRCPSMCM = '000201';
 
@@ -43,10 +49,19 @@ class PixGenerator
 
     public PixValidator $validator;
 
-    public function __construct(string $chavePix)
+    /**
+     * Cria uma nova instância do gerador PIX
+     * 
+     * @param string $chavePix Chave PIX (CPF, CNPJ, email, telefone ou chave aleatória)
+     * @param bool $validateOnConstruct Se deve validar a chave no construtor (padrão: true)
+     * @throws PixException Se a chave PIX for inválida
+     */
+    public function __construct(string $chavePix, bool $validateOnConstruct = true)
     {
         $this->validator = new PixValidator($chavePix);
-        $this->validator->validate();
+        if ($validateOnConstruct) {
+            $this->validator->validate();
+        }
 
         $this->chavePix = $chavePix;
         $this->transactionId = PixTools::randomId();
@@ -54,36 +69,86 @@ class PixGenerator
         $this->merchantCity = self::DEFAULT_MERCHANT_CITY;
     }
 
+    /**
+     * Define o valor da transação PIX
+     * 
+     * @param float $transactionAmount Valor em reais (deve ser positivo)
+     * @return self Para encadeamento de métodos (fluent interface)
+     * @throws PixException Se o valor for negativo ou zero
+     */
     public function setTransactionAmount(float $transactionAmount): PixGenerator
     {
+        if ($transactionAmount <= 0) {
+            throw new PixException('O valor da transação deve ser positivo');
+        }
         $this->transactionAmount = $transactionAmount;
         return $this;
     }
 
+    /**
+     * Define o ID da transação
+     * 
+     * @param string $transactionId ID único da transação
+     * @return self Para encadeamento de métodos
+     */
     public function setTransactionId(string $transactionId): PixGenerator
     {
         $this->transactionId = $transactionId;
         return $this;
     }
 
+    /**
+     * Define o nome do recebedor
+     * 
+     * @param string $merchantName Nome do recebedor (máximo 25 caracteres)
+     * @return self Para encadeamento de métodos
+     * @throws PixException Se o nome exceder o limite de tamanho
+     */
     public function setMerchantName(string $merchantName): PixGenerator
     {
-        $this->merchantName = $merchantName;
+        $sanitized = PixTools::sanitizeText($merchantName);
+        if (strlen($sanitized) > self::MAX_MERCHANT_NAME_LEN) {
+            throw new PixException('Nome do recebedor excede o limite de tamanho!');
+        }
+        $this->merchantName = $sanitized;
         return $this;
     }
 
+    /**
+     * Define a cidade do recebedor
+     * 
+     * @param string $merchantCity Cidade do recebedor (máximo 15 caracteres)
+     * @return self Para encadeamento de métodos
+     * @throws PixException Se o nome da cidade exceder o limite de tamanho
+     */
     public function setMerchantCity(string $merchantCity): PixGenerator
     {
-        $this->merchantCity = $merchantCity;
+        $sanitized = PixTools::sanitizeText($merchantCity);
+        if (strlen($sanitized) > self::MAX_MERCHANT_CITY_LEN) {
+            throw new PixException('Nome da cidade excede o limite de tamanho!');
+        }
+        $this->merchantCity = $sanitized;
         return $this;
     }
 
+    /**
+     * Define informações adicionais sobre a transação
+     * 
+     * @param string $additionalInfo Informações adicionais
+     * @return self Para encadeamento de métodos
+     */
     public function setAdditionalInfo(string $additionalInfo): PixGenerator
     {
         $this->additionalInfo = $additionalInfo;
         return $this;
     }
 
+    /**
+     * Gera o código PIX completo
+     * 
+     * @return string Código PIX no formato EMV para QR Code
+     * @throws PixException Se algum campo exceder os limites estabelecidos
+     */
     public function getCode(): string
     {
         $content = self::QRCPSMCM;
@@ -174,7 +239,7 @@ class PixGenerator
     {
         $transactionId =  PixTools::makePart(self::ID_ADDITIONAL_DATA_FIELD_TEMPLATE_TXID_ID, $this->transactionId);
 
-        if (strlen($transactionId) > self::MAX_ADITIONAL_DATA_FIELD_TEMPLATE_LEN) {
+        if (strlen($transactionId) > self::MAX_ADDITIONAL_DATA_FIELD_TEMPLATE_LEN) {
             throw new PixException('Id da transação excede o limite de tamanho!');
         }
 

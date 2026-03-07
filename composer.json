@@ -3,6 +3,13 @@
     "description": "A static PIX (copy and paste) generator",
     "type": "library",
     "license": "MIT",
+    "keywords": ["pix", "payment", "qrcode", "brazil", "banco-central"],
+    "require": {
+        "php": ">=8.3"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^11.5"
+    },
     "autoload": {
         "psr-4": {
             "VictorRenan\\PixGenerator\\": "src/"
@@ -16,8 +23,5 @@
             "name": "Renan",
             "email": "alvesrenanpro@gmail.com"
         }
-    ],
-    "require-dev": {
-        "phpunit/phpunit": "^11.5"
-    }
+    ]
 }
